@@ -25,6 +25,17 @@ export default function MedicationList({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetchMedications();
+    
+    // Listen for medication added event
+    const handleMedicationAdded = () => {
+      fetchMedications();
+    };
+    
+    window.addEventListener('medicationAdded', handleMedicationAdded);
+    
+    return () => {
+      window.removeEventListener('medicationAdded', handleMedicationAdded);
+    };
   }, [userId]);
 
   const fetchMedications = async () => {

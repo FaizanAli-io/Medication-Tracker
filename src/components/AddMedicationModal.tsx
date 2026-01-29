@@ -69,10 +69,12 @@ export default function AddMedicationModal({
 
       if (response.ok) {
         onClose();
-        window.location.reload();
+        // Refresh the parent component by triggering a custom event
+        window.dispatchEvent(new Event('medicationAdded'));
       }
     } catch (error) {
       console.error('Failed to create medication:', error);
+      alert('Failed to create medication. Please try again.');
     } finally {
       setLoading(false);
     }

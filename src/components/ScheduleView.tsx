@@ -36,6 +36,17 @@ export default function ScheduleView({
 
   useEffect(() => {
     fetchSchedules();
+    
+    // Listen for medication added event to refresh schedules
+    const handleMedicationAdded = () => {
+      fetchSchedules();
+    };
+    
+    window.addEventListener('medicationAdded', handleMedicationAdded);
+    
+    return () => {
+      window.removeEventListener('medicationAdded', handleMedicationAdded);
+    };
   }, [userId, filter]);
 
   const fetchSchedules = async () => {
@@ -70,9 +81,23 @@ export default function ScheduleView({
     }
   };
 
-  const rescheduledose = async (id: string) => {
+  const rescheduleDose = async (id: string) => {
     const newTime = prompt('Enter new date and time (YYYY-MM-DD HH:MM):');
     if (!newTime) return;
+
+    // Validate date format
+    const dateTimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+    if (!dateTimeRegex.test(newTime)) {
+      alert('Invalid format. Please use YYYY-MM-DD HH:MM (e.g., 2024-01-30 14:30)');
+      return;
+    }
+
+    // Validate that it's a valid date
+    const parsedDate = new Date(newTime.replace(' ', 'T'));
+    if (isNaN(parsedDate.getTime())) {
+      alert('Invalid date. Please enter a valid date and time.');
+      return;
+    }
 
     try {
       await fetch(`/api/schedules/${id}`, {
@@ -176,7 +201,7 @@ export default function ScheduleView({
                   Skip
                 </button>
                 <button
-                  onClick={() => rescheduledose(schedule.id)}
+                  onClick={() => rescheduleDose(schedule.id)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
                 >
                   Reschedule
